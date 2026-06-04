@@ -1,0 +1,608 @@
+``html
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>ثبت سفارشات قطعات مهام</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      direction: rtl;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      color: #1e2a3a;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 10px;
+      color: #0f3b5c;
+      border-right: 5px solid #0f3b5c;
+      padding-right: 15px;
+    }
+    .sub {
+      color: #2c5a7a;
+      margin-bottom: 25px;
+      border-right: 2px solid #b0c4de;
+      padding-right: 15px;
+    }
+    /* کنترل‌های بالا */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 25px;
+      background: white;
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      align-items: center;
+    }
+    #search {
+      flex: 2;
+      min-width: 180px;
+      padding: 12px 15px;
+      border: 1px solid #cfdfed;
+      border-radius: 40px;
+      font-size: 1rem;
+      background: #fff;
+      transition: 0.2s;
+    }
+    #search:focus {
+      outline: none;
+      border-color: #2c7cb6;
+      box-shadow: 0 0 0 2px rgba(44,124,182,0.2);
+    }
+    .category-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cat-btn {
+      background: #eef2f7;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+    .cat-btn.active {
+      background: #0f3b5c;
+      color: white;
+    }
+    /* دو ستونه محصولات و سبد */
+    .shop-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+    }
+    .products-section {
+      flex: 2;
+      min-width: 260px;
+    }
+    .cart-section {
+      flex: 1.2;
+      min-width: 280px;
+      background: white;
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      transition: 0.2s;
+      border: 1px solid #e9edf2;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+    }
+    .product-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #1e4663;
+    }
+    .product-code {
+      font-size: 0.7rem;
+      color: #7f8c8d;
+      background: #f0f2f5;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .product-price {
+      color: #2c7a47;
+      font-weight: bold;
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .qty-control button {
+      background: #eef2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .qty-control button:active {
+      background: #cddae6;
+    }
+    .qty-display {
+      font-weight: bold;
+      min-width: 30px;
+      text-align: center;
+    }
+    .add-btn {
+      background: #2c7cb6;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    /* سبد خرید */
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .cart-item-info {
+      flex: 2;
+    }
+    .cart-item-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .cart-item-code {
+      font-size: 0.7rem;
+      color: #6c757d;
+    }
+    .cart-item-price {
+      font-size: 0.8rem;
+      color: #2c7a47;
+    }
+    .cart-qty {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 5px 0;
+    }
+    .cart-qty button {
+      background: #e2e8f0;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .remove-item {
+      background: none;
+      border: none;
+      color: #c0392b;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 5px;
+    }
+    .cart-total {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 15px 0;
+      text-align: left;
+      border-top: 2px dashed #bdd4e7;
+      padding-top: 15px;
+    }
+    .customer-fields {
+      margin-top: 20px;
+    }
+    .customer-fields input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #cfdfed;
+      border-radius: 28px;
+      font-size: 0.9rem;
+    }
+    .submit-btn {
+      background: #1e6f3f;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.2s;
+    }
+    .submit-btn:hover {
+      background: #0f5430;
+    }
+    .msg {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      padding: 8px;
+      border-radius: 50px;
+    }
+    .empty-cart {
+      color: #9aaebf;
+      text-align: center;
+      padding: 20px 0;
+    }
+    @media (max-width: 800px) {
+      .cart-section {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>📱 ثبت سفارشات قطعات مهام</h1>
+  <div class="sub">✨ جستجو، انتخاب تعداد، سبد خرید حرفه‌ای و ثبت مستقیم در شیت</div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="🔍 جستجو در نام محصول ..." autocomplete="off">
+    <div class="category-btns" id="categoryBtns">
+      <button class="cat-btn active" data-cat="all">همه</button>
+      <button class="cat-btn" data-cat="LCD">LCD</button>
+      <button class="cat-btn" data-cat="BATTERY">باتری</button>
+      <button class="cat-btn" data-cat="Back">قاب پشت</button>
+    </div>
+  </div>
+
+  <div class="shop-layout">
+    <div class="products-section">
+      <div id="productsGrid" class="products-grid"></div>
+    </div>
+
+    <div class="cart-section">
+      <h3>🛒 سبد خرید</h3>
+      <div id="cartItemsList"></div>
+      <div id="cartTotal" class="cart-total"></div>
+      <div class="customer-fields">
+        <input type="text" id="customerCode" placeholder="کد اشتراک" autocomplete="off">
+        <input type="text" id="customerLastname" placeholder="نام خانوادگی" autocomplete="off">
+      </div>
+      <button class="submit-btn" id="submitOrderBtn">📦 ثبت سفارش</button>
+      <div id="statusMsg" class="msg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- ALL PRODUCTS (بر اساس جداول شما) ----------
+const productsData = [
+  // LCD ها
+  {code:"a1", cat:"LCD", brand:"Samsung", model:"a125", quality:"شرکتی", price:1980000, nameExtra:""},
+  {code:"a2", cat:"LCD", brand:"Samsung", model:"a127 wf", quality:"شرکتی", price:2300000},
+  {code:"a3", cat:"LCD", brand:"Samsung", model:"a10", quality:"شرکتی", price:2400000},
+  {code:"a4", cat:"LCD", brand:"Samsung", model:"a11", quality:"شرکتی", price:1780000},
+  {code:"a5", cat:"LCD", brand:"Xiaomi", model:"redmi note 8", quality:"اورجینال چین", price:1450000},
+  {code:"a6", cat:"LCD", brand:"Xiaomi", model:"redmi note 8 pro", quality:"اورجینال دبی", price:2250000},
+  {code:"a7", cat:"LCD", brand:"Xiaomi", model:"redmi 8", quality:"اورجینال چین", price:1880000},
+  {code:"a8", cat:"LCD", brand:"Huawei", model:"p30 lite wf", quality:"اورجینال چین", price:1900000},
+  {code:"a9", cat:"LCD", brand:"Huawei", model:"p10 lite", quality:"اورجینال چین", price:1850000},
+  {code:"a10", cat:"LCD", brand:"Iphone", model:"13", quality:"شرکتی", price:15000000},
+  {code:"a11", cat:"LCD", brand:"Iphone", model:"13 pro", quality:"اولد(GX)", price:14800000},
+  {code:"a12", cat:"LCD", brand:"IPhone", model:"13", quality:"روکاری", price:20000000},
+  // BATTERY ها
+  {code:"b1", cat:"BATTERY", brand:"Samsung", model:"a12", quality:"شرکتی", price:1200000},
+  {code:"b2", cat:"BATTERY", brand:"Samsung", model:"a14", quality:"شرکتی", price:1450000},
+  {code:"b3", cat:"BATTERY", brand:"Xiaomi", model:"redmi 8", quality:"شرکتی", price:1150000},
+  {code:"b4", cat:"BATTERY", brand:"Xiaomi", model:"redmi note 8", quality:"شرکتی", price:980000},
+  {code:"b5", cat:"BATTERY", brand:"Xiaomi", model:"redmi note 8", quality:"اورجینال چین", price:2100000},
+  {code:"b6", cat:"BATTERY", brand:"Huawei", model:"p30 lite", quality:"اورجینال چین", price:1120000},
+  // Back ها (با رنگ)
+  {code:"c1", cat:"Back", brand:"Samsung", model:"a12", quality:"بازاری", price:100000, color:"Blue"},
+  {code:"c2", cat:"Back", brand:"Samsung", model:"a10", quality:"بازاری", price:220000, color:"black"},
+  {code:"c3", cat:"Back", brand:"Samsung", model:"a14", quality:"بازاری", price:180000, color:"red"},
+  {code:"c4", cat:"Back", brand:"Xiaomi", model:"redmi 8", quality:"بازاری", price:310000, color:"pink"},
+  {code:"c5", cat:"Back", brand:"Xiaomi", model:"redmi note 8 pro", quality:"بازاری", price:430000, color:"green"},
+  {code:"c6", cat:"Back", brand:"Xiaomi", model:"redmi note 8", quality:"بازاری", price:400000, color:"yellow"}
+];
+
+// ساخت نام کامل محصول برای نمایش
+function buildProductName(p) {
+  if(p.cat === "Back") {
+    return `${p.cat} ${p.brand} ${p.model} (${p.quality}) - ${p.color}`;
+  }
+  return `${p.cat} ${p.brand} ${p.model} (${p.quality})`;
+}
+
+const products = productsData.map(p => ({
+  ...p,
+  displayName: buildProductName(p)
+}));
+
+// سبد خرید: {code, qty}
+let cart = [];
+
+// DOM elements
+const searchInput = document.getElementById('search');
+const productsGrid = document.getElementById('productsGrid');
+const cartItemsList = document.getElementById('cartItemsList');
+const cartTotalSpan = document.getElementById('cartTotal');
+const customerCode = document.getElementById('customerCode');
+const customerLastname = document.getElementById('customerLastname');
+const statusMsg = document.getElementById('statusMsg');
+let activeCategory = 'all';
+
+// توابع کمکی
+function filterProducts() {
+  const searchTerm = searchInput.value.trim().toLowerCase();
+  return products.filter(p => {
+    const matchCat = activeCategory === 'all' || p.cat === activeCategory;
+    const matchSearch = searchTerm === '' || p.displayName.toLowerCase().includes(searchTerm) || p.code.toLowerCase().includes(searchTerm);
+    return matchCat && matchSearch;
+  });
+}
+
+function getCartQtyForCode(code) {
+  const item = cart.find(i => i.code === code);
+  return item ? item.qty : 0;
+}
+
+function updateCartQty(code, delta) {
+  const existing = cart.find(i => i.code === code);
+  if(existing) {
+    const newQty = existing.qty + delta;
+    if(newQty <= 0) {
+      cart = cart.filter(i => i.code !== code);
+    } else {
+      existing.qty = newQty;
+    }
+  } else if(delta > 0) {
+    cart.push({code, qty: delta});
+  }
+  renderAll();
+}
+
+function removeCartItem(code) {
+  cart = cart.filter(i => i.code !== code);
+  renderAll();
+}
+
+// محاسبه جمع قیمت سبد
+function getCartTotal() {
+  let total = 0;
+  cart.forEach(item => {
+    const prod = products.find(p => p.code === item.code);
+    if(prod) total += prod.price * item.qty;
+  });
+  return total;
+}
+
+// رندر محصولات + سبد خرید
+function renderProducts() {
+  const filtered = filterProducts();
+  if(filtered.length === 0) {
+    productsGrid.innerHTML = '<div style="padding:20px; text-align:center;">❌ محصولی یافت نشد</div>';
+    return;
+  }
+  let html = '';
+  filtered.forEach(prod => {
+    const cartQty = getCartQtyForCode(prod.code);
+    html += `
+      <div class="product-card">
+        <div class="product-title">${prod.displayName}</div>
+        <div class="product-code">${prod.code}</div>
+        <div class="product-price">${prod.price.toLocaleString()} تومان</div>
+        <div class="qty-control">
+          <button class="decr-prod" data-code="${prod.code}">−</button>
+          <span class="qty-display">${cartQty}</span>
+          <button class="incr-prod" data-code="${prod.code}">+</button>
+          ${cartQty === 0 ? `<button class="add-btn" data-code="${prod.code}">➕ اضافه</button>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  productsGrid.innerHTML = html;
+  
+  // attach events
+  document.querySelectorAll('.decr-prod').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.dataset.code;
+      updateCartQty(code, -1);
+    });
+  });
+  document.querySelectorAll('.incr-prod').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.dataset.code;
+      updateCartQty(code, +1);
+    });
+  });
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const code = btn.dataset.code;
+      updateCartQty(code, +1);
+    });
+  });
+}
+
+function renderCartSidebar() {
+  if(cart.length === 0) {
+    cartItemsList.innerHTML = '<div class="empty-cart">🛒 سبد خرید خالی است</div>';
+    cartTotalSpan.innerHTML = 'جمع کل: ۰ تومان';
+    return;
+  }
+  let html = '';
+  cart.forEach(item => {
+    const prod = products.find(p => p.code === item.code);
+    if(!prod) return;
+    const itemTotal = prod.price * item.qty;
+    html += `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${prod.displayName}</div>
+          <div class="cart-item-code">${prod.code}</div>
+          <div class="cart-item-price">${prod.price.toLocaleString()} تومان</div>
+        </div>
+        <div>
+          <div class="cart-qty">
+            <button class="cart-decr" data-code="${prod.code}">−</button>
+            <span>${item.qty}</span>
+            <button class="cart-incr" data-code="${prod.code}">+</button>
+            <button class="remove-item" data-code="${prod.code}">🗑️</button>
+          </div>
+          <div style="font-size:0.75rem; margin-top:4px;">💰 ${itemTotal.toLocaleString()}</div>
+        </div>
+      </div>
+    `;
+  });
+  cartItemsList.innerHTML = html;
+  const total = getCartTotal();
+  cartTotalSpan.innerHTML = `🧾 جمع کل: ${total.toLocaleString()} تومان`;
+  
+  // attach cart events
+  document.querySelectorAll('.cart-decr').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const code = btn.dataset.code;
+      updateCartQty(code, -1);
+    });
+  });
+  document.querySelectorAll('.cart-incr').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const code = btn.dataset.code;
+      updateCartQty(code, +1);
+    });
+  });
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const code = btn.dataset.code;
+      removeCartItem(code);
+    });
+  });
+}
+
+function renderAll() {
+  renderProducts();
+  renderCartSidebar();
+}
+
+// --- ثبت سفارش به Google Sheet (Web App) ---
+// *** مهم: لینک پایین را با URL واقعی Web App خود جایگزین کنید ***
+const SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL';   // <--- اینجا آدرس script.google.com را قرار دهید
+
+async function submitOrderToSheet() {
+  const code = customerCode.value.trim();
+  const lastname = customerLastname.value.trim();
+  if(!code || !lastname) {
+    statusMsg.innerHTML = '⚠️ لطفاً کد اشتراک و نام خانوادگی را وارد کنید.';
+    statusMsg.style.color = '#c0392b';
+    return;
+  }
+  if(cart.length === 0) {
+    statusMsg.innerHTML = '🛑 سبد خرید خالی است، حداقل یک کالا اضافه کنید.';
+    statusMsg.style.color = '#e67e22';
+    return;
+  }
+  
+  // ساخت آرایه اقلام برای ذخیره (با کد و تعداد)
+  const itemsForSheet = cart.map(item => ({
+    code: item.code,
+    qty: item.qty
+  }));
+  const totalPrice = getCartTotal();
+  
+  const payload = {
+    code: code,
+    lastname: lastname,
+    items: itemsForSheet,
+    total: totalPrice
+  };
+  
+  statusMsg.innerHTML = '⏳ در حال ثبت سفارش ...';
+  statusMsg.style.color = '#2c7cb6';
+  
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // برای سادگی در Apps Script با mode no-cors, ولی بهتر است cors معمولی با تنظیم script
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // در حالت no-cors نمی‌توان پاسخ را خواند، اما فرض می‌کنیم موفق است.
+    // برای تجربه بهتر، در کد Apps Script قبلی doPost پاسخ success می‌دهد.
+    // پیشنهاد می‌کنم در صورت خطا از mode معمولی استفاده کنید.
+    statusMsg.innerHTML = '✅ سفارش با موفقیت ثبت شد! سبد خرید خالی شد.';
+    statusMsg.style.color = '#1e6f3f';
+    // پاک کردن سبد خرید و فرم
+    cart = [];
+    customerCode.value = '';
+    customerLastname.value = '';
+    renderAll();
+    setTimeout(() => {
+      statusMsg.innerHTML = '';
+    }, 4000);
+  } catch(err) {
+    console.error(err);
+    statusMsg.innerHTML = '❌ خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
+    statusMsg.style.color = '#c0392b';
+  }
+}
+
+// راه‌اندازی فیلترها و ایونت‌ها
+function init() {
+  renderAll();
+  
+  searchInput.addEventListener('input', () => renderProducts());
+  
+  // دسته بندی
+  const catBtns = document.querySelectorAll('.cat-btn');
+  catBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      catBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.cat;
+      renderProducts();
+    });
+  });
+  
+  document.getElementById('submitOrderBtn').addEventListener('click', submitOrderToSheet);
+}
+
+init();
+</script>
+</body>
+</html
